@@ -1,0 +1,7 @@
+export {Home as Home} from './home'
+export {History as History} from './home'
+export {Leagues as Leagues} from './match'
+export {Squads as Squads} from './match'
+export {Tabscreen as Tabscreen} from './match'
+export {Picksquad as Picksquad} from './squads'
+export {Pickcaptain as Pickcaptain} from './squads'
