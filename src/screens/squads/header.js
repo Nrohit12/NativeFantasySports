@@ -3,11 +3,14 @@ import {View, Text, Image, StyleSheet} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {left} from '../../assets/images';
 import dateDiff from '../../functions/dateDiff';
+import {useNavigation} from '@react-navigation/native'
+
 
 function Header({match}) {
+  const navigation = useNavigation()
   return (
     <View style={styles.container}>
-      <IconButton icon={left} color="#F8FCFF" />
+      <IconButton icon={left} color="#F8FCFF"  onPress={() => navigation.goBack()}/>
       
         <View style={styles.team}>
           <Text style={styles.teamText}>

@@ -20,7 +20,7 @@ const Section = ({children, title}) =>
   
 
 const History= () => 
-    <SafeAreaView >
+    <SafeAreaView style={{backgroundColor: '#1B2234', flex:1}}>
         <View>
           <Section title="Development in progress.">
             App screen development <Text style={styles.highlight}>in progress.</Text> 

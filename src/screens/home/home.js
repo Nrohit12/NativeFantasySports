@@ -1,26 +1,33 @@
 import React, {useEffect} from 'react';
-import {Text, View, ScrollView, StyleSheet, Image} from 'react-native';
+import {
+  Text,
+  View,
+  ScrollView,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import {dva} from '../../assets/images';
 import {renderFirstRow} from './firstRow';
 import {FlatList} from 'react-native-gesture-handler';
-import { useDispatch, useSelector } from "react-redux";
-import {firstRowItems, getMatches} from './const';
+import {useDispatch, useSelector} from 'react-redux';
+import {firstRowItems} from './const';
 import {renderCricketRow} from './cricketRow';
 
-import {setMatch} from '../../redux/action'
+import {setMatch} from '../../redux/action';
 
-const matchImages = [
-  {
+const matchImages = {
+  cricket: {
     label: 'Fantasy Cricket',
     key: 'cricket',
     image: require('../../assets/media/cricket.png'),
   },
-  {
+  football: {
     label: 'Fantasy Football',
     key: 'football',
     image: require('../../assets/media/football.jpg'),
   },
-];
+};
 
 const header = () => (
   <View style={styles.header}>
@@ -39,42 +46,54 @@ const header = () => (
 );
 
 export default function () {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const {loading, matchData} = useSelector(state => state.allMatch);
 
   useEffect(() => {
-    dispatch(setMatch())
+    dispatch(setMatch());
   }, []);
-  
 
   return (
     <ScrollView style={styles.backgroundStyle}>
       {header()}
-      <View>
-        <FlatList
-          data={firstRowItems}
-          renderItem={renderFirstRow}
-          keyExtractor={item => item.name}
-          nestedScrollEnabled={true}
-          horizontal={true}
-        />
-      </View>
 
-      {matchImages.map(item => (
-        <View key={item.key}>
-          <View style={styles.matchViews}>
-            <Image style={styles.matchImageStyle} source={item.image} />
-            <Text style={styles.userName}>{item.label}</Text>
-          </View>
-          
+      {loading ? (
+        <ActivityIndicator size="large" color="#00ff00" style={{margin:200}}/>
+      ) : (
+        <View>
           <FlatList
-            data={getMatches.matches['cricket']}
-            renderItem={renderCricketRow}
-            keyExtractor={item => item.id}
+            data={firstRowItems}
+            renderItem={renderFirstRow}
+            keyExtractor={item => item.name}
             nestedScrollEnabled={true}
             horizontal={true}
           />
+          {matchData.order.map((item, index) => (
+            <View key={index}>
+              {index < 2 ? (
+                <View>
+                  <View style={styles.matchViews}>
+                    <Image
+                      style={styles.matchImageStyle}
+                      source={matchImages[item].image}
+                    />
+                    <Text style={styles.userName}>
+                      {matchImages[item].label}
+                    </Text>
+                  </View>
+                  <FlatList
+                    data={matchData.matches[item]}
+                    renderItem={renderCricketRow}
+                    keyExtractor={item => item.id}
+                    nestedScrollEnabled={true}
+                    horizontal={true}
+                  />
+                </View>
+              ) : null}
+            </View>
+          ))}
         </View>
-      ))}
+      )}
     </ScrollView>
   );
 }

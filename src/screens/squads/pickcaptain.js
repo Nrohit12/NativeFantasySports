@@ -44,19 +44,19 @@ function Pickcaptain({route, navigation}) {
   const {newSquadData} = useSelector(state => state.newSquad);
 
   const changeColor = (item, name) => {
-    if (newSquadData[name] === item.player_id) return true;
+    if (newSquadData[name] === item.id) return true;
   };
   const changeCaptain = item => {
-    if (newSquadData['vice_captain'] === item.player_id) return;
+    if (newSquadData['vice_captain_id'] === item.id) console.log('ello');
     else {
-      newSquadData['captain'] = item.player_id;
+      newSquadData['captain_id'] = item.id;
       dispatch(setNewSquad(newSquadData));
     }
   };
   const changeViceCaptain = item => {
-    if (newSquadData['captain'] === item.player_id) return;
+    if (newSquadData['captain_id'] === item.id) return;
     else {
-      newSquadData['vice_captain'] = item.player_id;
+      newSquadData['vice_captain_id'] = item.id;
       dispatch(setNewSquad(newSquadData));
     }
   };
@@ -75,7 +75,8 @@ function Pickcaptain({route, navigation}) {
       ]);
     else {
       dispatch(setSquads(newSquadData))
-      navigation.navigate('Home');
+      navigation.navigate('Tabs');
+      
     };
   };
 
@@ -116,7 +117,7 @@ function Pickcaptain({route, navigation}) {
         <View style={{width: '10%'}}>
           <TouchableOpacity
             style={[
-              changeColor(item, 'captain')
+              changeColor(item, 'captain_id')
                 ? {backgroundColor: 'green'}
                 : {backgroundColor: '#92A9BD'},
               {width: '80%', alignItems: 'center'},
@@ -128,7 +129,7 @@ function Pickcaptain({route, navigation}) {
         <View style={{width: '10%'}}>
           <TouchableOpacity
             style={[
-              changeColor(item, 'vice_captain')
+              changeColor(item, 'vice_captain_id')
                 ? {backgroundColor: 'green'}
                 : {backgroundColor: '#92A9BD'},
               {width: '80%', alignItems: 'center'},

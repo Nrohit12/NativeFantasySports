@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
 import Header from './header';
@@ -42,6 +43,24 @@ const routeName = name => {
   }
 };
 
+const checkTeamPlayers = (data, t1_name, t2_name, selection) => {
+  let count1 = 0,
+    count2 = 0;
+  data.map(item => {
+    item.team_short_name == t1_name ? count1++ : count2++;
+  });
+  return (
+    (selection.team_short_name === t1_name && count1 >= 7) ||
+    (selection.team_short_name === t2_name && count2 >= 7)
+  );
+};
+const checkCredit = (data, item) => {
+  let count = item.event_player_credit;
+  data.map(item => {
+    count += item.event_player_credit;
+  });
+  return count >= 100;
+};
 const countNumberPlayer = (name, data) => {
   let count = 0;
   data.map(item => {
@@ -74,15 +93,13 @@ const checkNumber = (routeName, data) => {
 };
 
 function PlayerList({route, navigation}) {
-  const players = route.params.players;
+  const {match, players} = route.params;
   const {squadsData} = useSelector(state => state.squad);
+  
   const newSquadNumber = squadsData.length + 1;
   const dispatch = useDispatch();
   const {newSquadData} = useSelector(state => state.newSquad);
 
-  // useEffect(() => {
-  //   console.log(newSquadData)
-  // },[route.name])
   const changeColor = item => {
     if (newSquadData['squad'] === undefined) return false;
     else return newSquadData['squad'].includes(item);
@@ -90,14 +107,32 @@ function PlayerList({route, navigation}) {
   const handleClick = item => {
     if (newSquadData['squad'].includes(item)) {
       newSquadData['squad'].splice(newSquadData['squad'].indexOf(item), 1);
-    }
+    } else if (
+      checkTeamPlayers(
+        newSquadData.squad,
+        match.t1_short_name,
+        match.t2_short_name,
+        item,
+      )
+    )
+      Alert.alert(
+        'Can not add to Squad',
+        'Please select only 7 players from one team',
+        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
+      );
     else if (checkNumber(route.name, newSquadData.squad))
       Alert.alert(
         'Can not add to Squad',
         'Add 3-7 Batsman, 0-4 All-Rounder, 3-7 Bowler and 1-5 Wicket keeper and not more than 11 players',
         [{text: 'OK', onPress: () => console.log('OK Pressed')}],
       );
-     else {
+    else if (checkCredit(newSquadData.squad, item))
+      Alert.alert(
+        'Can not add to Squad',
+        'Choose another player with low credit or select other combination',
+        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
+      );
+    else {
       newSquadData['squad'].push(item);
     }
     dispatch(setNewSquad(newSquadData));

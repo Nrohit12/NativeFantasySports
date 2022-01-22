@@ -8,30 +8,38 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  ActivityIndicator,Alert
 } from 'react-native';
 import Header from './header';
 import {createsquads} from '../../assets/images';
 import {useDispatch, useSelector} from 'react-redux';
+import {getSquads} from '../../redux/action';
 
 function Squads({route, navigation}) {
-  const {squadsData} = useSelector(state => state.squad);
+  const {squadsData, loading} = useSelector(state => state.squad);
   const numColumns = 2;
+  const match = route.params;
+  const dispatch = useDispatch();
+  React.useEffect(() => {
+    dispatch(getSquads(match.id));
+  }, [match.id]);
 
   const getName = (name, item) => {
-    let temp = item['squad'].filter(squad => item[name] === squad.player_id);
+    let temp = item['squad'].filter(squad => item[name] === squad.id);
     return temp[0].short_name;
   };
 
   const getImage = (name, item) => {
-    let temp = item['squad'].filter(squad => item[name] === squad.player_id);
+    let temp = item['squad'].filter(squad => item[name] === squad.id);
     return temp[0].team_logo;
   };
+
 
   const renderSquads = ({item, index}) => {
     return (
       <TouchableOpacity style={styles.squadView}>
         <View style={{borderBottomWidth: 1, padding: 5}}>
-          <Text style={{fontWeight: '600', fontSize: 18}}>
+          <Text style={{fontWeight: '600', fontSize: 18, color:'white'}}>
             {item.team_name}
           </Text>
         </View>
@@ -40,20 +48,20 @@ function Squads({route, navigation}) {
             source={{uri: getImage('captain', item)}}
             style={{height: 15, width: 15}}
           />
-          <Text style={{fontWeight: '600', fontSize: 14, paddingHorizontal: 4}}>
+          <Text style={{fontWeight: '600', fontSize: 14, paddingHorizontal: 4,color:'white'}}>
             {getName('captain', item)}
           </Text>
-          <Text style={{backgroundColor: 'blue'}}>C</Text>
+          <Text style={{backgroundColor: 'blue',color:'white'}}>C</Text>
         </View>
         <View style={{flexDirection: 'row', padding: 5}}>
           <Image
             source={{uri: getImage('vice_captain', item)}}
             style={{height: 15, width: 15}}
           />
-          <Text style={{fontWeight: '600', fontSize: 14, paddingHorizontal: 4}}>
+          <Text style={{fontWeight: '600', fontSize: 14, paddingHorizontal: 4, color:'white'}}>
             {getName('vice_captain', item)}
           </Text>
-          <Text style={{backgroundColor: 'green'}}>VC</Text>
+          <Text style={{backgroundColor: 'green',color:'white'}}>VC</Text>
         </View>
       </TouchableOpacity>
     );
@@ -68,6 +76,7 @@ function Squads({route, navigation}) {
       navigation.navigate('Picksquads', {
         match: route.params,
       });
+    
   };
   const createSquadButton = () => (
     <TouchableOpacity onPress={() => handleClick()} style={styles.button}>
@@ -77,30 +86,42 @@ function Squads({route, navigation}) {
   return (
     <SafeAreaView style={styles.backgroundStyle}>
       <Header match={route.params} />
-      {squadsData.length === 0 ? (
-        <View style={styles.noSquadView}>
-          <Image source={createsquads} style={styles.createsquadimageStyle} />
-          <Text style={styles.createsquadtextStyle}>
-            You haven't created any squad yet, create one to continue
-          </Text>
-        </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#00ff00" style={{margin: 200}} />
       ) : (
-        <View style={{flex: 1, alignItems:'center'}}>
-          <View style={{marginTop: 10, padding: 10, alignItems: 'center'}}>
-            <Text style={{color: 'white'}}>
-              <Text style={{color: 'red', fontWeight: '800', fontSize: 20}}>
-                {squadsData.length}
+        <View style={{flex:1}}>
+          {squadsData.length === 0 ? (
+            <View style={styles.noSquadView}>
+              <Image
+                source={createsquads}
+                style={styles.createsquadimageStyle}
+              />
+              <Text style={styles.createsquadtextStyle}>
+                You haven't created any squad yet, create one to continue
               </Text>
-              /10 Squads added
-            </Text>
-          </View>
-          <FlatList
-            numColumns={numColumns}
-            data={squadsData}
-            renderItem={renderSquads}
-          />
+            </View>
+          ) : (
+            <View style={{flex: 1}}>
+              <View style={{marginTop: 10, padding: 10, alignItems: 'center'}}>
+                <Text style={{color: 'white'}}>
+                  <Text style={{color: 'red', fontWeight: '800', fontSize: 20}}>
+                    {squadsData.length}
+                  </Text>
+                  /10 Squads added
+                </Text>
+              </View>
+              <FlatList
+                numColumns={numColumns}
+                data={squadsData}
+                renderItem={renderSquads}
+              />
+            </View>
+          )
+          }
         </View>
+        
       )}
+
       {createSquadButton()}
     </SafeAreaView>
   );
@@ -134,6 +155,8 @@ const styles = StyleSheet.create({
     borderColor: 'blue',
     alignSelf: 'center',
     margin: 10,
+    width: '40%',
+    alignSelf:'center'
   },
   sectionTitle: {
     fontSize: 18,

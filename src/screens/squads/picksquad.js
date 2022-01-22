@@ -6,14 +6,16 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image, Alert
+  Image,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
 import Header from './header';
 import {players} from './const';
 import Toptabnavigator from './playertoptabnavigator';
 import {useDispatch, useSelector} from 'react-redux';
-import {setSquads, setNewSquad} from '../../redux/action';
+import {setNewSquad, setPlayers} from '../../redux/action';
 
 // const squad = {
 // 	"id": ,
@@ -41,14 +43,17 @@ function Picksquad({route, navigation}) {
   const newSquadNumber = squadsData.length + 1;
   const dispatch = useDispatch();
   const {newSquadData} = useSelector(state => state.newSquad);
-
+  const {loading} = useSelector(state => state.allPlayers);
   useEffect(() => {
     Object.assign(newSquadData, {
-      team_name: `Sqaud ${newSquadNumber}`,
-      squad: [],
-      captain: 0,
-	    vice_captain : 0,
+      event_id: 56,
+      captain_id: 0,
+      vice_captain_id: 0,
+      match_id: match.id,
+      event_id: 1,
+      squad:[]
     });
+    dispatch(setPlayers(match.id));
   }, []);
 
   const countCredit = () => {
@@ -66,30 +71,26 @@ function Picksquad({route, navigation}) {
     });
     return count;
   };
-  
+
   const checkSquad = () => {
-    if(countNumberPlayer('Batsman', newSquadData.squad) <3) Alert.alert(
-        'Can not proceed',
-        'Please select minimun 3 Batsman',
-        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
-      )
-      else if(countNumberPlayer('Bowler', newSquadData.squad) <3) Alert.alert(
-        'Can not proceed',
-        'Please select minimun 3 Bowler',
-        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
-      )
-      else if(countNumberPlayer('Wicket-Keeper', newSquadData.squad) <1) Alert.alert(
-        'Can not proceed',
-        'Please select minimun 1 Wicket Keeper',
-        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
-      )
-      else if(newSquadData['squad'].length < 11) Alert.alert(
-        'Can not proceed',
-        'Please select minimun 11 Players',
-        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
-      )
-      else navigation.navigate('Pickcaptain')
-  }
+    if (countNumberPlayer('Batsman', newSquadData.squad) < 3)
+      Alert.alert('Can not proceed', 'Please select minimun 3 Batsman', [
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ]);
+    else if (countNumberPlayer('Bowler', newSquadData.squad) < 3)
+      Alert.alert('Can not proceed', 'Please select minimun 3 Bowler', [
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ]);
+    else if (countNumberPlayer('Wicket-Keeper', newSquadData.squad) < 1)
+      Alert.alert('Can not proceed', 'Please select minimun 1 Wicket Keeper', [
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ]);
+    else if (newSquadData['squad'].length < 11)
+      Alert.alert('Can not proceed', 'Please select minimun 11 Players', [
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ]);
+    else navigation.navigate('Pickcaptain');
+  };
 
   const renderBottom = () => {
     return (
@@ -148,7 +149,11 @@ function Picksquad({route, navigation}) {
   return (
     <SafeAreaView style={styles.backgroundStyle}>
       <Header match={route.params.params.match} />
-      <Toptabnavigator players={players} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#00ff00" style={{margin: 200}} />
+      ) : (
+        <Toptabnavigator match={match} />
+      )}
       {renderBottom()}
     </SafeAreaView>
   );
